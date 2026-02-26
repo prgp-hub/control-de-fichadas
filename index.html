@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/2088/2088617.png">
+	<link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2088/2088617.png">
+
+	<meta name="mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+	<meta name="apple-mobile-web-app-title" content="Fichadas">
+	<meta name="theme-color" content="#0A2A5B">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Control de Fichadas PRL</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --orange: #FF5C1A;
+            --orange-light: #FF8A5C;
+            --orange-glow: rgba(255, 92, 26, 0.18);
+            --navy: #0A2A5B;
+            --navy-mid: #1A3D7A;
+            --surface: #F0F4FA;
+            --card: #FFFFFF;
+            --border: #E4ECF7;
+            --text-main: #0F1F3D;
+            --text-muted: #7A96C2;
+            --text-soft: #A8BFDC;
+            --green: #10B981;
+            --green-light: #D1FAE5;
+            --green-border: #6EE7B7;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: #FFFFFF;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            padding: 24px 16px 40px;
+            color: var(--text-main);
+            position: relative;
+			overflow-y: auto; 
+			-webkit-overflow-scrolling: touch;
+        }
+
+ 
+        .shell {
+            width: 100%;
+            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ── Header ── */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 4px 2px;
+            animation: fadeDown 0.5s ease both;
+        }
+
+        .header-left { display: flex; align-items: center; gap: 12px; }
+
+        .logo-box {
+            width: 40px; height: 40px;
+            background: linear-gradient(135deg, var(--orange) 0%, var(--orange-light) 100%);
+            border-radius: 12px;
+            display: grid; place-items: center;
+            box-shadow: 0 4px 12px rgba(255,92,26,0.35);
+            position: relative;
+            overflow: hidden;
+        }
+        .logo-box::before {
+            content: '';
+            position: absolute;
+            top: -10px; left: -10px;
+            width: 30px; height: 30px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 50%;
+        }
+        .logo-box svg { width: 20px; height: 20px; fill: white; position: relative; z-index: 1; }
+
+        .header-text h1 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--navy);
+            letter-spacing: -0.3px;
+        }
+        .header-text p {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .header-badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.6rem;
+            font-weight: 500;
+            color: var(--orange);
+            background: rgba(255,92,26,0.08);
+            border: 1px solid rgba(255,92,26,0.2);
+            border-radius: 20px;
+            padding: 4px 10px;
+            letter-spacing: 0.05em;
+        }
+
+        /* ── Hero display ── */
+        .hero-card {
+            background: var(--card);
+            border-radius: 22px;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 24px rgba(10,42,91,0.08), 0 1px 4px rgba(10,42,91,0.05);
+            animation: fadeUp 0.5s 0.1s ease both;
+        }
+
+        .hero-card::before {
+            content: '';
+            position: absolute;
+            top: -40px; right: -40px;
+            width: 160px; height: 160px;
+            background: radial-gradient(circle, rgba(255,92,26,0.07) 0%, transparent 70%);
+        }
+        .hero-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0;
+            width: 100%; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(10,42,91,0.06), transparent);
+        }
+
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            gap: 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-divider {
+            width: 1px;
+            height: 60px;
+            background: linear-gradient(to bottom, transparent, var(--border), transparent);
+            margin: 0 20px;
+        }
+
+        .hero-section { }
+        
+		.hero-section.right {
+			text-align: right; 
+			display: flex;
+			flex-direction: column;
+			align-items: flex-end;
+		}
+		
+		.salida-wrapper {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			width: fit-content;
+		}
+
+        .hero-label {
+            font-size: 0.58rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            color: var(--navy);
+            margin-bottom: 10px;
+        }
+
+        .jornada-input {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.0rem;
+            font-weight: 600;
+            color: var(--navy-mid);
+            background: #F4F7FB;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            padding: 8px 12px;
+            width: 110px;
+            text-align: center;
+            outline: none;
+            transition: all 0.2s;
+            letter-spacing: 0.05em;
+        }
+        .jornada-input:focus {
+            background: white;
+            border-color: var(--orange);
+            box-shadow: 0 0 0 3px rgba(255,92,26,0.1);
+        }
+
+        .salida-time {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--orange);
+            line-height: 1;
+            letter-spacing: -0.02em;
+			padding: 0px 15px;
+        }
+        .salida-time .secs {
+            font-size: 0.5em;
+            color: var(--orange-light);
+            font-weight: 400;
+        }
+
+        .hero-status {
+            margin-top: 6px;
+            font-size: 0.6rem;
+            color: var(--text-soft);
+            font-weight: 400;
+            letter-spacing: 0.05em;
+        }
+
+        /* ── Section card ── */
+        .card {
+            background: var(--card);
+            border-radius: 18px;
+            padding: 6px 20px 20px;
+            border: 1.5px solid var(--border);
+            box-shadow: 0 8px 24px rgba(10,42,91,0.12), 0 1px 3px rgba(10,42,91,0.04);
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            animation: fadeUp 0.5s 0.2s ease both;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 16px 0 10px;
+        }
+
+        .section-dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+		
+        .dot-entry { 
+			background: var(--orange); 
+		}
+		
+        .dot-almuerzo { 
+			background: var(--orange); 
+		}
+		
+        .dot-comida { 
+			background: var(--orange); 
+		}
+
+        .section-name {
+            font-size: 0.62rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            color: var(--text-muted);
+        }
+
+        .section-line {
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, var(--border), transparent);
+        }
+
+        /* rows */
+        .time-row {
+            display: grid;
+            grid-template-columns: 1fr 130px 38px 38px;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 0;
+        }
+
+        .row-label {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #475569;
+            letter-spacing: -0.01em;
+        }
+
+        .time-input {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.82rem;
+            font-weight: 400;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            padding: 9px 8px;
+            background: #F8FAFD;
+            outline: none;
+            width: 100%;
+            text-align: center;
+            transition: all 0.2s;
+            color: var(--text-main);
+			appearance: none;
+			-webkit-appearance: none;
+			min-height: 40px;
+        }
+        .time-input:focus {
+            border-color: var(--navy-mid);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(10,42,91,0.07);
+        }
+        .time-input.filled {
+            background: #F8FAFD;
+            border-color: var(--green-border);
+            color: #065F46;
+            font-weight: 500;
+        }
+
+        /* Buttons */
+        .btn-now {
+            width: 38px; height: 38px;
+            border-radius: 10px;
+            border: none;
+            background: var(--navy);
+            cursor: pointer;
+            display: grid;
+            place-items: center;
+            transition: all 0.18s;
+            flex-shrink: 0;
+        }
+        .btn-now:hover {
+            background: var(--orange);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255,92,26,0.3);
+        }
+        .btn-now:active { transform: scale(0.94); }
+        .btn-now svg { width: 16px; height: 16px; fill: white; }
+
+        .btn-clear {
+            width: 38px; height: 38px;
+            border-radius: 10px;
+            border: 1.5px solid var(--border);
+            background: transparent;
+            cursor: pointer;
+            display: grid;
+            place-items: center;
+            transition: all 0.18s;
+            flex-shrink: 0;
+        }
+        .btn-clear svg {
+            width: 12px; height: 12px;
+            stroke: var(--text-soft);
+            stroke-width: 2.5;
+            fill: none;
+            transition: stroke 0.2s;
+        }
+        .btn-clear:hover {
+            background: #FEF2F2;
+            border-color: #FECACA;
+        }
+        .btn-clear:hover svg { stroke: #EF4444; }
+        .btn-clear:active { transform: scale(0.94); }
+
+        .row-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 2px 0;
+            opacity: 0.6;
+        }
+
+        /* Animations */
+        @keyframes fadeDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(14px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+		
+		.progress-dots {
+			display: flex;
+			justify-content: center;
+			gap: 8px;
+			margin-top: 10px;
+			margin-right: 15px;
+			width: 100px;
+		}
+
+		.dot {
+			width: 4px;   /* Reduzido */
+			height: 4px;  /* Reduzido */
+			background-color: #E2E8F0;
+			border-radius: 50%;
+			transition: all 0.3s ease;
+		}
+
+		.dot.active {
+			background-color: var(--navy);
+			box-shadow: 0 0 6px rgba(10, 42, 91, 0.3);
+			/* Removi o transform: scale(1.2) para não aumentar de tamanho */
+		}
+
+        @media (max-width: 420px) {
+            body { padding: 16px 12px 32px; }
+            .hero-card { padding: 20px 18px; }
+			.shell { max-width: 100%; }
+            .salida-time { font-size: 1.7rem; }
+            .jornada-input { font-size: 1.3rem; width: 100px; }
+            .time-row { grid-template-columns: 1fr 115px 36px 36px; gap: 6px; }
+            .btn-now, .btn-clear { width: 34px; height: 34px; }
+			.hero-label { 
+				white-space: nowrap; /* Impede o "salida" de ir para a linha de baixo */
+			}
+			.hero-grid {
+				grid-template-columns: 1fr auto 1.2fr; /* Dá um pouco mais de espaço para o lado direito */
+			}
+        }
+    </style>
+</head>
+<body>
+
+<div class="shell">
+
+    <!-- Header -->
+    <div class="header">
+        <div class="header-left">
+            <div class="logo-box">
+                <svg viewBox="0 0 24 24"><path d="M12 2c5.52 0 10 4.48 10 10s-4.48 10-10 10S2 17.52 2 12 6.48 2 12 2zm0 18c4.41 0 8-3.59 8-8s-3.59-8-8-8-8 3.59-8 8 3.59 8 8 8zm.5-13H11v6l5.2 3.1.8-1.3-4.5-2.7V7z"/></svg>
+            </div>
+            <div class="header-text">
+                <h1>Control de Fichadas</h1>
+                <p>PRL · Jornada Laboral</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Hero card: jornada + saída -->
+    <div class="hero-card">
+        <div class="hero-grid">
+            <div class="hero-section">
+                <div class="hero-label">Jornada Laboral</div>
+                <input
+                    type="text"
+                    id="jornada"
+                    class="jornada-input"
+                    value="08:30"
+                    maxlength="5"
+                    oninput="mascaraJornada(this); calcular()"
+                >
+            </div>
+            <div class="hero-divider"></div>
+            <div class="hero-section right">
+				<div class="hero-label">Hora prevista de salida</div>
+				<div class="salida-time" id="salidaFinal">--:--<span class="secs">:--</span></div>
+				<div class="progress-dots" id="progressContainer">
+					<span class="dot"></span>
+					<span class="dot"></span>
+					<span class="dot"></span>
+				</div>
+			</div>
+        </div>
+    </div>
+
+    <!-- Times card -->
+    <div class="card">
+
+        <!-- Llegada -->
+        <div class="section-header">
+            <div class="section-dot dot-entry"></div>
+            <span class="section-name">Llegada</span>
+            <div class="section-line"></div>
+        </div>
+        <div class="time-row">
+            <span class="row-label">Entrada</span>
+            <input type="text" id="e1" class="time-input" step="1" oninput="onInput('e1')">
+            <button class="btn-now" onclick="marcar('e1')" title="Marcar ahora">
+                <svg viewBox="0 0 24 24"><path d="M12 2c5.52 0 10 4.48 10 10s-4.48 10-10 10S2 17.52 2 12 6.48 2 12 2zm0 18c4.41 0 8-3.59 8-8s-3.59-8-8-8-8 3.59-8 8 3.59 8 8 8zm.5-13H11v6l5.2 3.1.8-1.3-4.5-2.7V7z"/></svg>
+            </button>
+            <button class="btn-clear" onclick="limpiar('e1')" title="Limpiar">
+                <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+
+        <!-- Almuerzo -->
+        <div class="section-header" style="padding-top: 12px;">
+            <div class="section-dot dot-almuerzo"></div>
+            <span class="section-name">Almuerzo</span>
+            <div class="section-line"></div>
+        </div>
+        <div class="time-row">
+            <span class="row-label">Salida</span>
+            <input type="text" id="sA" class="time-input" step="1" oninput="onInput('sA')">
+            <button class="btn-now" onclick="marcar('sA')">
+                <svg viewBox="0 0 24 24"><path d="M12 2c5.52 0 10 4.48 10 10s-4.48 10-10 10S2 17.52 2 12 6.48 2 12 2zm0 18c4.41 0 8-3.59 8-8s-3.59-8-8-8-8 3.59-8 8 3.59 8 8 8zm.5-13H11v6l5.2 3.1.8-1.3-4.5-2.7V7z"/></svg>
+            </button>
+            <button class="btn-clear" onclick="limpiar('sA')">
+                <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <div class="row-divider"></div>
+        <div class="time-row">
+            <span class="row-label">Vuelta</span>
+            <input type="text" id="vA" class="time-input" step="1" oninput="onInput('vA')">
+            <button class="btn-now" onclick="marcar('vA')">
+                <svg viewBox="0 0 24 24"><path d="M12 2c5.52 0 10 4.48 10 10s-4.48 10-10 10S2 17.52 2 12 6.48 2 12 2zm0 18c4.41 0 8-3.59 8-8s-3.59-8-8-8-8 3.59-8 8 3.59 8 8 8zm.5-13H11v6l5.2 3.1.8-1.3-4.5-2.7V7z"/></svg>
+            </button>
+            <button class="btn-clear" onclick="limpiar('vA')">
+                <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+
+        <!-- Comida -->
+        <div class="section-header" style="padding-top: 12px;">
+            <div class="section-dot dot-comida"></div>
+            <span class="section-name">Comida</span>
+            <div class="section-line"></div>
+        </div>
+        <div class="time-row">
+            <span class="row-label">Salida</span>
+            <input type="text" id="sC" class="time-input" step="1" oninput="onInput('sC')">
+            <button class="btn-now" onclick="marcar('sC')">
+                <svg viewBox="0 0 24 24"><path d="M12 2c5.52 0 10 4.48 10 10s-4.48 10-10 10S2 17.52 2 12 6.48 2 12 2zm0 18c4.41 0 8-3.59 8-8s-3.59-8-8-8-8 3.59-8 8 3.59 8 8 8zm.5-13H11v6l5.2 3.1.8-1.3-4.5-2.7V7z"/></svg>
+            </button>
+            <button class="btn-clear" onclick="limpiar('sC')">
+                <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <div class="row-divider"></div>
+        <div class="time-row">
+            <span class="row-label">Vuelta</span>
+            <input type="text" id="vC" class="time-input" step="1" oninput="onInput('vC')">
+            <button class="btn-now" onclick="marcar('vC')">
+                <svg viewBox="0 0 24 24"><path d="M12 2c5.52 0 10 4.48 10 10s-4.48 10-10 10S2 17.52 2 12 6.48 2 12 2zm0 18c4.41 0 8-3.59 8-8s-3.59-8-8-8-8 3.59-8 8 3.59 8 8 8zm.5-13H11v6l5.2 3.1.8-1.3-4.5-2.7V7z"/></svg>
+            </button>
+            <button class="btn-clear" onclick="limpiar('vC')">
+                <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+
+    </div>
+</div>
+
+<script>
+
+	document.addEventListener("DOMContentLoaded", function() {
+		// Agora roda em Desktop e Mobile
+		const inputs = document.querySelectorAll('.time-input');
+		
+		inputs.forEach(input => {
+			// Mudamos para text para ter controle total da máscara
+			input.type = 'text';
+			input.placeholder = 'HH:MM:SS';
+			input.setAttribute('inputmode', 'numeric');
+
+			// Máscara com controle de cursor (sua edição não quebra mais)
+			input.addEventListener('input', function(e) {
+				let cursor = e.target.selectionStart;
+				let v = e.target.value.replace(/\D/g, '');
+				let formatted = "";
+
+				if (v.length > 6) v = v.slice(0, 6);
+				
+				if (v.length > 0) {
+					formatted = v.substring(0, 2);
+					if (v.length > 2) formatted += ':' + v.substring(2, 4);
+					if (v.length > 4) formatted += ':' + v.substring(4, 6);
+				}
+
+				const oldLength = e.target.value.length;
+				e.target.value = formatted;
+				
+				let newCursor = cursor;
+				if (formatted.length > oldLength && (newCursor === 3 || newCursor === 6)) {
+					newCursor++;
+				}
+				e.target.setSelectionRange(newCursor, newCursor);
+			});
+
+			// Validação ao sair do campo (o "39" vira "23", etc)
+			input.addEventListener('blur', function(e) {
+				let v = e.target.value.replace(/\D/g, '');
+				if (!v) return;
+
+				v = v.padEnd(6, '0');
+				
+				let hh = Math.min(parseInt(v.slice(0, 2)), 23);
+				let mm = Math.min(parseInt(v.slice(2, 4)), 59);
+				let ss = Math.min(parseInt(v.slice(4, 6)), 59);
+
+				e.target.value = `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}:${String(ss).padStart(2,'0')}`;
+				onInput(input.id);
+			});
+		});
+		
+		carregarDados();
+		
+	});
+
+    function mascaraJornada(i) {
+        let v = i.value.replace(/\D/g, '');
+        if (v.length > 4) v = v.slice(0, 4);
+        if (v.length >= 3) v = v.replace(/^(\d{2})(\d{2}).*/, '$1:$2');
+        i.value = v;
+		salvarDados();
+    }
+
+    function onInput(id) {
+        const el = document.getElementById(id);
+        el.classList.toggle('filled', !!el.value);
+        calcular();
+		salvarDados();
+    }
+
+    function marcar(id) {
+        const n = new Date();
+        const el = document.getElementById(id);
+        el.value = `${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}:${String(n.getSeconds()).padStart(2,'0')}`;
+        el.classList.add('filled');
+        calcular();
+		salvarDados();
+    }
+
+    function limpiar(id) {
+        const el = document.getElementById(id);
+        el.value = '';
+        el.classList.remove('filled');
+        calcular();
+		salvarDados();
+    }
+
+    function aSegundos(v) {
+        if (!v) return 0;
+        const p = v.split(':');
+        return parseInt(p[0]) * 3600 + parseInt(p[1]) * 60 + (p[2] ? parseInt(p[2]) : 0);
+    }
+
+    function calcular() {
+    const jornada = aSegundos(document.getElementById('jornada').value);
+    const e1 = document.getElementById('e1').value;
+    const sC = document.getElementById('sC').value;
+    const vC = document.getElementById('vC').value;
+    const sA = aSegundos(document.getElementById('sA').value);
+    const vA = aSegundos(document.getElementById('vA').value);
+
+    // 1. Lógica dos Pontos
+    const dots = document.querySelectorAll('.dot');
+    const obrigatorios = [e1, sC, vC];
+    const preenchidos = obrigatorios.filter(valor => valor !== '').length;
+
+    dots.forEach((dot, index) => {
+        dot.classList.toggle('active', index < preenchidos);
+    });
+
+    // 2. Gerenciar Mensagem "Pendiente de dato"
+    const resDiv = document.getElementById('salidaFinal');
+
+    if (!e1) {
+        resDiv.innerHTML = '--:--<span class="secs">:--</span>';
+        return;
+    }
+
+    // 3. Cálculo
+    const e1Seg = aSegundos(e1);
+    const sCSeg = aSegundos(sC);
+    const vCSeg = aSegundos(vC);
+    const pA = (vA > sA) ? (vA - sA) : 0;
+    const pC = (vCSeg > sCSeg) ? (vCSeg - sCSeg) : 0;
+    
+    const total = (e1Seg + jornada + pA + pC) % 86400;
+
+    // 4. Exibição com Segundos (Voltou!)
+    const h = Math.floor(total / 3600);
+    const m = Math.floor((total % 3600) / 60);
+    const s = total % 60; // Pega o resto dos segundos
+
+    resDiv.innerHTML = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}<span class="secs">:${String(s).padStart(2,'0')}</span>`;
+	}
+	
+		// Salva todos os valores atuais no telemóvel do utilizador
+	function salvarDados() {
+		const dados = {
+			jornada: document.getElementById('jornada').value,
+			e1: document.getElementById('e1').value,
+			sA: document.getElementById('sA').value,
+			vA: document.getElementById('vA').value,
+			sC: document.getElementById('sC').value,
+			vC: document.getElementById('vC').value
+		};
+		localStorage.setItem('meusHorariosPRL', JSON.stringify(dados));
+	}
+
+	// Recupera os dados ao abrir a página
+	function carregarDados() {
+		const salvo = localStorage.getItem('meusHorariosPRL');
+		if (salvo) {
+			const dados = JSON.parse(salvo);
+			Object.keys(dados).forEach(id => {
+				const el = document.getElementById(id);
+				if (el) {
+					el.value = dados[id];
+					if (el.value) el.classList.add('filled');
+				}
+			});
+			calcular(); // Recalcula a saída com os dados carregados
+		}
+	}
+</script>
+
+</body>
+</html>
