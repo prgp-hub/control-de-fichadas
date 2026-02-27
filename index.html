@@ -12,6 +12,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Control de Fichadas PRL</title>
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+	
+		<script async src="https://www.googletagmanager.com/gtag/js?id=G-7HB17DKBC6"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-7HB17DKBC6');
+    </script>
+	<script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "vo124x25dw");
+	</script>
+	
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -435,7 +452,7 @@
             </div>
             <div class="header-text">
                 <h1>Control de Fichadas</h1>
-                <p>PRL · Jornada Laboral</p>
+                <p>Jornada Laboral</p>
             </div>
         </div>
 
@@ -452,7 +469,6 @@
                     class="jornada-input"
                     value="08:30"
                     maxlength="5"
-                    oninput="mascaraJornada(this); calcular()"
                 >
             </div>
             <div class="hero-divider"></div>
@@ -548,20 +564,17 @@
 </div>
 
 <script>
-
 	document.addEventListener("DOMContentLoaded", function() {
-		// Agora roda em Desktop e Mobile
+		// 1. Configuração dos campos de entrada (Entrada, Almuerzo, Comida)
 		const inputs = document.querySelectorAll('.time-input');
 		
 		inputs.forEach(input => {
-			// Mudamos para text para ter controle total da máscara
-			input.type = 'text';
-			input.placeholder = 'HH:MM:SS';
 			input.setAttribute('inputmode', 'numeric');
 
-			// Máscara com controle de cursor (sua edição não quebra mais)
+			// Máscara enquanto digita (HH:MM:SS)
 			input.addEventListener('input', function(e) {
 				let cursor = e.target.selectionStart;
+				let valorAntigo = e.target.value;
 				let v = e.target.value.replace(/\D/g, '');
 				let formatted = "";
 
@@ -573,23 +586,23 @@
 					if (v.length > 4) formatted += ':' + v.substring(4, 6);
 				}
 
-				const oldLength = e.target.value.length;
 				e.target.value = formatted;
-				
-				let newCursor = cursor;
-				if (formatted.length > oldLength && (newCursor === 3 || newCursor === 6)) {
-					newCursor++;
+
+				if (formatted.length > valorAntigo.length && (cursor === 3 || cursor === 6)) {
+					cursor++;
 				}
-				e.target.setSelectionRange(newCursor, newCursor);
+				e.target.setSelectionRange(cursor, cursor);
 			});
 
-			// Validação ao sair do campo (o "39" vira "23", etc)
+			// Trava de segurança ao sair do campo (HH:MM:SS)
 			input.addEventListener('blur', function(e) {
 				let v = e.target.value.replace(/\D/g, '');
-				if (!v) return;
+				if (!v) {
+					onInput(input.id);
+					return;
+				};
 
 				v = v.padEnd(6, '0');
-				
 				let hh = Math.min(parseInt(v.slice(0, 2)), 23);
 				let mm = Math.min(parseInt(v.slice(2, 4)), 59);
 				let ss = Math.min(parseInt(v.slice(4, 6)), 59);
@@ -598,90 +611,120 @@
 				onInput(input.id);
 			});
 		});
+
+		// 2. Configuração específica do campo JORNADA (HH:MM)
+		const jornadaInput = document.getElementById('jornada');
+
+		jornadaInput.addEventListener('input', function(e) {
+			let cursor = e.target.selectionStart;
+			let valorAntigo = e.target.value;
+			let v = e.target.value.replace(/\D/g, '');
+			
+			if (v.length > 4) v = v.slice(0, 4);
+			
+			let formatted = "";
+			if (v.length > 0) {
+				formatted = v.substring(0, 2);
+				if (v.length > 2) formatted += ':' + v.substring(2, 4);
+			}
+			
+			e.target.value = formatted;
+			if (formatted.length > valorAntigo.length && cursor === 3) cursor++;
+			e.target.setSelectionRange(cursor, cursor);
+			
+			calcular();
+			salvarDados();
+		});
+
+		// A TRAVA DA JORNADA (Máximo 23:59)
+		jornadaInput.addEventListener('blur', function() {
+			let v = this.value.replace(/\D/g, '');
+			if (!v) return;
+			
+			v = v.padEnd(4, '0');
+			let hh = Math.min(parseInt(v.slice(0, 2)), 23);
+			let mm = Math.min(parseInt(v.slice(2, 4)), 59);
+			
+			this.value = `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
+			calcular();
+			salvarDados();
+		});
+
 		carregarDados();
 	});
 
-    function mascaraJornada(i) {
-        let v = i.value.replace(/\D/g, '');
-        if (v.length > 4) v = v.slice(0, 4);
-        if (v.length >= 3) v = v.replace(/^(\d{2})(\d{2}).*/, '$1:$2');
-        i.value = v;
+	// --- FUNÇÕES GLOBAIS ---
+
+	function onInput(id) {
+		const el = document.getElementById(id);
+		el.classList.toggle('filled', !!el.value);
+		calcular();
 		salvarDados();
-    }
-
-    function onInput(id) {
-        const el = document.getElementById(id);
-        el.classList.toggle('filled', !!el.value);
-        calcular();
-		salvarDados();
-    }
-
-    function marcar(id) {
-        const n = new Date();
-        const el = document.getElementById(id);
-        el.value = `${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}:${String(n.getSeconds()).padStart(2,'0')}`;
-        el.classList.add('filled');
-        calcular();
-		salvarDados();
-    }
-
-    function limpiar(id) {
-        const el = document.getElementById(id);
-        el.value = '';
-        el.classList.remove('filled');
-        calcular();
-		salvarDados();
-    }
-
-    function aSegundos(v) {
-        if (!v) return 0;
-        const p = v.split(':');
-        return parseInt(p[0]) * 3600 + parseInt(p[1]) * 60 + (p[2] ? parseInt(p[2]) : 0);
-    }
-
-    function calcular() {
-    const jornada = aSegundos(document.getElementById('jornada').value);
-    const e1 = document.getElementById('e1').value;
-    const sC = document.getElementById('sC').value;
-    const vC = document.getElementById('vC').value;
-    const sA = aSegundos(document.getElementById('sA').value);
-    const vA = aSegundos(document.getElementById('vA').value);
-
-    // 1. Lógica dos Pontos
-    const dots = document.querySelectorAll('.dot');
-    const obrigatorios = [e1, sC, vC];
-    const preenchidos = obrigatorios.filter(valor => valor !== '').length;
-
-    dots.forEach((dot, index) => {
-        dot.classList.toggle('active', index < preenchidos);
-    });
-
-    // 2. Gerenciar Mensagem "Pendiente de dato"
-    const resDiv = document.getElementById('salidaFinal');
-
-    if (!e1) {
-        resDiv.innerHTML = '--:--<span class="secs">:--</span>';
-        return;
-    }
-
-    // 3. Cálculo
-    const e1Seg = aSegundos(e1);
-    const sCSeg = aSegundos(sC);
-    const vCSeg = aSegundos(vC);
-    const pA = (vA > sA) ? (vA - sA) : 0;
-    const pC = (vCSeg > sCSeg) ? (vCSeg - sCSeg) : 0;
-    
-    const total = (e1Seg + jornada + pA + pC) % 86400;
-
-    // 4. Exibição com Segundos (Voltou!)
-    const h = Math.floor(total / 3600);
-    const m = Math.floor((total % 3600) / 60);
-    const s = total % 60; // Pega o resto dos segundos
-
-    resDiv.innerHTML = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}<span class="secs">:${String(s).padStart(2,'0')}</span>`;
 	}
-	
-		// Salva todos os valores atuais no telemóvel do utilizador
+
+	function marcar(id) {
+		const n = new Date();
+		const el = document.getElementById(id);
+		el.value = `${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}:${String(n.getSeconds()).padStart(2,'0')}`;
+		el.classList.add('filled');
+		calcular();
+		salvarDados();
+	}
+
+	function limpiar(id) {
+		const el = document.getElementById(id);
+		el.value = '';
+		el.classList.remove('filled');
+		calcular();
+		salvarDados();
+	}
+
+	function aSegundos(v) {
+		if (!v) return 0;
+		const p = v.split(':');
+		return parseInt(p[0]) * 3600 + parseInt(p[1]) * 60 + (p[2] ? parseInt(p[2]) : 0);
+	}
+
+	function calcular() {
+		const jornadaVal = document.getElementById('jornada').value;
+		const jornada = aSegundos(jornadaVal);
+		const e1 = document.getElementById('e1').value;
+		const sC = document.getElementById('sC').value;
+		const vC = document.getElementById('vC').value;
+		const sA = aSegundos(document.getElementById('sA').value);
+		const vA = aSegundos(document.getElementById('vA').value);
+
+		// Lógica dos Pontos
+		const dots = document.querySelectorAll('.dot');
+		const obrigatorios = [e1, sC, vC];
+		const preenchidos = obrigatorios.filter(valor => valor !== '').length;
+
+		dots.forEach((dot, index) => {
+			dot.classList.toggle('active', index < preenchidos);
+		});
+
+		const resDiv = document.getElementById('salidaFinal');
+
+		if (!e1) {
+			resDiv.innerHTML = '--:--<span class="secs">:--</span>';
+			return;
+		}
+
+		const e1Seg = aSegundos(e1);
+		const sCSeg = aSegundos(sC);
+		const vCSeg = aSegundos(vC);
+		const pA = (vA > sA) ? (vA - sA) : 0;
+		const pC = (vCSeg > sCSeg) ? (vCSeg - sCSeg) : 0;
+		
+		const total = (e1Seg + jornada + pA + pC) % 86400;
+
+		const h = Math.floor(total / 3600);
+		const m = Math.floor((total % 3600) / 60);
+		const s = total % 60;
+
+		resDiv.innerHTML = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}<span class="secs">:${String(s).padStart(2,'0')}</span>`;
+	}
+
 	function salvarDados() {
 		const dados = {
 			jornada: document.getElementById('jornada').value,
@@ -694,7 +737,6 @@
 		localStorage.setItem('meusHorariosPRL', JSON.stringify(dados));
 	}
 
-	// Recupera os dados ao abrir a página
 	function carregarDados() {
 		const salvo = localStorage.getItem('meusHorariosPRL');
 		if (salvo) {
@@ -706,7 +748,7 @@
 					if (el.value) el.classList.add('filled');
 				}
 			});
-			calcular(); // Recalcula a saída com os dados carregados
+			calcular();
 		}
 	}
 </script>
